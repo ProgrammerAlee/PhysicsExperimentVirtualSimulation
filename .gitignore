@@ -1,0 +1,7 @@
+Library/
+Logs/
+Temp/
+Packages/
+obj/
+.vs/
+UserSettings/Layouts/default-2022.dwlt
