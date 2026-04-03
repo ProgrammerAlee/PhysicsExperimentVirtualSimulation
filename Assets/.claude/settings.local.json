@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//mnt/c/**)",
+      "Bash(ls /mnt/)",
+      "Bash(ls /cmd/)",
+      "Bash(cmd //c \"dir E:\\\\U3DProject\\\\PhysicsExperimentVirtualSimulation\\\\Assets\\\\Scripts 2>&1\")",
+      "Bash(powershell -c \"ls E:\\\\U3DProject\\\\PhysicsExperimentVirtualSimulation\\\\Assets\\\\Scripts\")",
+      "Bash(powershell -c \"Get-Content 'E:\\\\U3DProject\\\\PhysicsExperimentVirtualSimulation\\\\Assets\\\\Scripts\\\\SimulationUIManager.cs'\")",
+      "Bash(powershell -c \"Get-Content 'E:\\\\U3DProject\\\\PhysicsExperimentVirtualSimulation\\\\Assets\\\\Scripts\\\\InventoryItemToggle.cs'\")",
+      "Read(//c/Users/Administrator/.config/**)",
+      "Read(//c/Users/Administrator/AppData/Roaming/**)",
+      "Bash(env)",
+      "Read(//e/U3DProject/PhysicsExperimentVirtualSimulation/**)",
+      "Read(//e/U3DProject/PhysicsExperimentVirtualSimulation//**)"
+    ]
+  }
+}
