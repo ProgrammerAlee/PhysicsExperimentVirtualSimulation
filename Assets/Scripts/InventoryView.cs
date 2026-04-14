@@ -134,6 +134,7 @@ public class InventoryView : MonoBehaviour
         foreach (var rb in rbs)
         {
             rb.isKinematic = true; // Make kinematic during preview
+            rb.detectCollisions = false; // Disable collision detection during preview
         }
     }
 
@@ -162,19 +163,66 @@ public class InventoryView : MonoBehaviour
         foreach (var col in colliders)
         {
             col.enabled = true;
+            // Unity 5+ requirement: MeshColliders must be convex if they have a non-kinematic Rigidbody attached
+            if (col is MeshCollider meshCollider)
+            {
+                if (meshCollider.sharedMesh != null && meshCollider.sharedMesh.name == "Quad")
+                {
+                    // We'll handle replacing Quad meshes immediately below
+                }
+                else
+                {
+                    meshCollider.convex = true;
+                }
+            }
         }
 
-        // Removed Rigidbody generation/un-freezing completely per user request
-
-        // Ensure any existing Rigidbodies are Kinematic so they don't fall
-        Rigidbody[] rbs = currentPreviewObject.GetComponentsInChildren<Rigidbody>();
-        foreach (var rb in rbs)
+        // Second pass: Replace invalid MeshColliders with BoxColliders
+        MeshCollider[] meshColliders = currentPreviewObject.GetComponentsInChildren<MeshCollider>();
+        foreach (var mc in meshColliders)
         {
-            rb.isKinematic = true;
+            if (mc.sharedMesh != null && mc.sharedMesh.name == "Quad")
+            {
+                GameObject obj = mc.gameObject;
+                DestroyImmediate(mc); // Must be DestroyImmediate so it's gone before physics update
+                obj.AddComponent<BoxCollider>();
+            }
+        }
+
+        // Restore original Rigidbody state (they were made kinematic during preview)
+        // We look at the original prefab to see what the intended state was
+        Rigidbody[] prefabRbs = currentSelectedProp.prefab.GetComponentsInChildren<Rigidbody>();
+        Rigidbody[] currentRbs = currentPreviewObject.GetComponentsInChildren<Rigidbody>();
+
+        for (int i = 0; i < currentRbs.Length; i++)
+        {
+            // Reset velocity and angular velocity to prevent explosive physics forces
+            // caused by enabling colliders that might be slightly intersecting with other objects
+            currentRbs[i].velocity = Vector3.zero;
+            currentRbs[i].angularVelocity = Vector3.zero;
+            currentRbs[i].detectCollisions = true; // Re-enable collision detection
+
+            if (i < prefabRbs.Length)
+            {
+                // Restore the original isKinematic state from the prefab
+                currentRbs[i].isKinematic = prefabRbs[i].isKinematic;
+            }
+            else
+            {
+                currentRbs[i].isKinematic = false;
+            }
         }
 
         // Add PlacedProp component to identify it as a pick-up-able item
         currentPreviewObject.AddComponent<PlacedProp>();
+
+        // IMPORTANT: Let colliders properly enable before removing them from "Ignore Raycast" or whatever layer they might be
+        // Let's make sure the object is on the Default layer (or whatever the prefab's original layer is)
+        currentPreviewObject.layer = currentSelectedProp.prefab.layer;
+        foreach (Transform child in currentPreviewObject.transform)
+        {
+            child.gameObject.layer = child.gameObject.layer; // Just triggering layer update
+        }
 
         // Reset state
         isPlacing = false;

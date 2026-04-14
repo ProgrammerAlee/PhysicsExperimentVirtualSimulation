@@ -49,8 +49,15 @@ public class WireUpdater : MonoBehaviour
         {
             Mesh mesh = new Mesh();
             lr.BakeMesh(mesh, cam, true);
+
+            // Unity physical collision system recalculates collision/forces when the mesh changes
+            // So we Temporarily disable the collider while updating it
+            meshCollider.enabled = false;
+
             meshCollider.sharedMesh = null;
             meshCollider.sharedMesh = mesh;
+
+            meshCollider.enabled = true;
         }
     }
 }

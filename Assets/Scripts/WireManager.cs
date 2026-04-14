@@ -181,6 +181,9 @@ public class WireManager : MonoBehaviour
 
         GameObject wireObj = new GameObject($"Wire_{a.terminalType}_{b.terminalType}");
 
+        // Place the wire object away from origin to avoid physics intersections before mesh updates
+        wireObj.transform.position = Vector3.zero;
+
         LineRenderer lr = wireObj.AddComponent<LineRenderer>();
         // Use Universal Render Pipeline shader if available, fallback to Unlit/Color if not found
         Shader urpShader = Shader.Find("Universal Render Pipeline/Lit");
@@ -209,9 +212,14 @@ public class WireManager : MonoBehaviour
 
         // MeshCollider 用于点击检测
         MeshCollider mc = wireObj.AddComponent<MeshCollider>();
+        // mc.isTrigger = true; // 移除：非凸包的 MeshCollider 不能作为 Trigger，会报错
         Mesh mesh = new Mesh();
         lr.BakeMesh(mesh, mainCam, true);
         mc.sharedMesh = mesh;
+
+        // 让导线的 GameObject 不在物理引擎中计算排斥力（层级分离）
+        // 确保你的 Default 物理层能够忽略与这层的交互（可选），或者仅靠 PlacedProp 的 Kinematic 就能解决
+        wireObj.layer = LayerMask.NameToLayer("Default"); // 还原，我们主要靠下面刚体修改来解决
 
         // WireUpdater 每帧同步端点位置
         WireUpdater updater = wireObj.AddComponent<WireUpdater>();
