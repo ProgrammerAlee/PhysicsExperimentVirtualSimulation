@@ -182,10 +182,20 @@ public class WireManager : MonoBehaviour
         GameObject wireObj = new GameObject($"Wire_{a.terminalType}_{b.terminalType}");
 
         LineRenderer lr = wireObj.AddComponent<LineRenderer>();
-        Material mat = new Material(Shader.Find("Standard"));
+        // Use Universal Render Pipeline shader if available, fallback to Unlit/Color if not found
+        Shader urpShader = Shader.Find("Universal Render Pipeline/Lit");
+        if (urpShader == null) urpShader = Shader.Find("Unlit/Color"); // Fallback
+
+        Material mat = new Material(urpShader);
         mat.color = wireColor;
-        mat.SetFloat("_Glossiness", 0.3f);
-        mat.SetFloat("_Metallic", 0.1f);
+
+        if (urpShader.name == "Universal Render Pipeline/Lit")
+        {
+            mat.SetColor("_BaseColor", wireColor); // URP uses _BaseColor instead of _Color
+            mat.SetFloat("_Smoothness", 0.3f);     // URP uses _Smoothness instead of _Glossiness
+            mat.SetFloat("_Metallic", 0.1f);
+        }
+
         lr.material = mat;
         lr.startWidth    = wireWidth;
         lr.endWidth      = wireWidth;
@@ -257,6 +267,14 @@ public class WireManager : MonoBehaviour
             case WireConnectionPoint.TerminalType.Voltmeter_Neg:   return "电压表 COM(-)";
             case WireConnectionPoint.TerminalType.Voltmeter_Pos3:  return "电压表 3V(+)";
             case WireConnectionPoint.TerminalType.Voltmeter_Pos15: return "电压表 15V(+)";
+            case WireConnectionPoint.TerminalType.Resistor_Left:   return "定值电阻 左端";
+            case WireConnectionPoint.TerminalType.Resistor_Right:  return "定值电阻 右端";
+            case WireConnectionPoint.TerminalType.Rheostat_A:      return "滑动变阻器 A端";
+            case WireConnectionPoint.TerminalType.Rheostat_B:      return "滑动变阻器 B端";
+            case WireConnectionPoint.TerminalType.Rheostat_C:      return "滑动变阻器 C端";
+            case WireConnectionPoint.TerminalType.Rheostat_D:      return "滑动变阻器 D端";
+            case WireConnectionPoint.TerminalType.Switch_Pos:      return "开关 正极";
+            case WireConnectionPoint.TerminalType.Switch_Neg:      return "开关 负极";
             default: return t.ToString();
         }
     }

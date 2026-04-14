@@ -8,11 +8,19 @@ public class WireConnectionPoint : MonoBehaviour
 {
     public enum TerminalType
     {
-        Battery_Neg,    // 电池负极
-        Battery_Pos,    // 电池正极
-        Voltmeter_Neg,  // 电压表负极
-        Voltmeter_Pos3, // 电压表正极3V
-        Voltmeter_Pos15 // 电压表正极15V
+        Battery_Neg,        // 电池负极
+        Battery_Pos,        // 电池正极
+        Voltmeter_Neg,      // 电压表负极
+        Voltmeter_Pos3,     // 电压表正极3V
+        Voltmeter_Pos15,    // 电压表正极15V
+        Resistor_Left,      // 应变片电阻左端
+        Resistor_Right,     // 应变片电阻右端
+        Rheostat_A,         // 滑动变阻器接线柱A（左下）
+        Rheostat_B,         // 滑动变阻器接线柱B（右下）
+        Rheostat_C,         // 滑动变阻器接线柱C（左上）
+        Rheostat_D,         // 滑动变阻器接线柱D（右上）
+        Switch_Pos,         // 开关正极（或进线端）
+        Switch_Neg          // 开关负极（或出线端）
     }
 
     [Header("端点配置")]
@@ -81,6 +89,8 @@ public class WireConnectionPoint : MonoBehaviour
     /// <summary>判断是否为负极</summary>
     public bool IsNegative()
     {
-        return terminalType == TerminalType.Battery_Neg || terminalType == TerminalType.Voltmeter_Neg;
+        return terminalType == TerminalType.Battery_Neg ||
+               terminalType == TerminalType.Voltmeter_Neg ||
+               terminalType == TerminalType.Switch_Neg;
     }
 }

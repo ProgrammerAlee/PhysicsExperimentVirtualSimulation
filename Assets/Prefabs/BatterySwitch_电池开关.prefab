@@ -1205,6 +1205,7 @@ GameObject:
   - component: {fileID: 1711145865450885474}
   - component: {fileID: 7846949014192294730}
   - component: {fileID: 6875145726690326802}
+  - component: {fileID: 1951799975773177881}
   m_Layer: 0
   m_Name: Base
   m_TagString: Untagged
@@ -1300,6 +1301,22 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &1951799975773177881
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5594843667205514280}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b92531847b83d8846adf888067375c3a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  terminalType: 11
+  hoverColor: {r: 1, g: 0.85, b: 0, a: 1}
+  selectedColor: {r: 0, g: 1, b: 0.4, a: 1}
+  defaultColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &7210141222590065516
 GameObject:
   m_ObjectHideFlags: 0
@@ -1312,6 +1329,7 @@ GameObject:
   - component: {fileID: 7814147245681807789}
   - component: {fileID: 6639609875093635245}
   - component: {fileID: 3736733011891261007}
+  - component: {fileID: 5958219198549163507}
   m_Layer: 0
   m_Name: Base
   m_TagString: Untagged
@@ -1407,3 +1425,19 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &5958219198549163507
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7210141222590065516}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b92531847b83d8846adf888067375c3a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  terminalType: 12
+  hoverColor: {r: 1, g: 0.85, b: 0, a: 1}
+  selectedColor: {r: 0, g: 1, b: 0.4, a: 1}
+  defaultColor: {r: 1, g: 1, b: 1, a: 1}
