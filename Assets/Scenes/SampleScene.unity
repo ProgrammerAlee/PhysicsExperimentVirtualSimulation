@@ -2087,6 +2087,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3d5b088e01e621e4f88d0e4db521ca96, type: 2}
   - {fileID: 11400000, guid: 4c4aa73863f119648a52491a6cc7c244, type: 2}
   - {fileID: 11400000, guid: c5a0ee5f727e6d243b00b083186c1f3b, type: 2}
+  - {fileID: 11400000, guid: b35a3cea30c4bdc478453bd0008549a5, type: 2}
   playerTransform: {fileID: 1602213241}
   mainCamera: {fileID: 1003121959}
   placementDistance: 1
