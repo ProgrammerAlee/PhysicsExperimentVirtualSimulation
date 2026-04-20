@@ -1,0 +1,4 @@
+SourceToolName,TargetToolName
+Battery,Switch
+Switch,Bulb
+Bulb,Battery

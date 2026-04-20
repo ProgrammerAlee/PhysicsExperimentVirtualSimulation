@@ -61,22 +61,29 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Mini First Person Controller\Scripts\Components\FirstPersonAudio.cs" />
+    <Compile Include="Assets\Scripts\GridSystem\GridToolUI.cs" />
+    <Compile Include="Assets\Scripts\GridSystem\GridSlotUI.cs" />
     <Compile Include="Assets\Mini First Person Controller\Scripts\Components\GroundCheck.cs" />
     <Compile Include="Assets\Scripts\InventoryItemUI.cs" />
+    <Compile Include="Assets\Scripts\GridSystem\GridToolPinUI.cs" />
     <Compile Include="Assets\Scripts\PlacedProp.cs" />
     <Compile Include="Assets\Scripts\FirstPersonController.cs" />
     <Compile Include="Assets\Scripts\WireManager.cs" />
     <Compile Include="Assets\Mini First Person Controller\Scripts\FirstPersonMovement.cs" />
+    <Compile Include="Assets\Scripts\GridSystem\GridWireManager.cs" />
     <Compile Include="Assets\Scripts\CrosshairUI.cs" />
     <Compile Include="Assets\Scripts\WireUpdater.cs" />
     <Compile Include="Assets\Scripts\PropData.cs" />
     <Compile Include="Assets\Mini First Person Controller\Scripts\Components\Jump.cs" />
+    <Compile Include="Assets\Scripts\GridSystem\GridValidationSystem.cs" />
     <Compile Include="Assets\Mini First Person Controller\Scripts\Components\Crouch.cs" />
     <Compile Include="Assets\Scripts\InventoryView.cs" />
+    <Compile Include="Assets\Scripts\GridSystem\GridToolData.cs" />
     <Compile Include="Assets\Scripts\WireConnectionPoint.cs" />
     <Compile Include="Assets\Mini First Person Controller\Scripts\Components\Zoom.cs" />
     <Compile Include="Assets\Scripts\InventoryItemToggle.cs" />
     <Compile Include="Assets\Mini First Person Controller\Scripts\FirstPersonLook.cs" />
+    <Compile Include="Assets\Scripts\GridSystem\GridManager.cs" />
     <Compile Include="Assets\Scripts\SimulationUIManager.cs" />
   </ItemGroup>
   <ItemGroup>
