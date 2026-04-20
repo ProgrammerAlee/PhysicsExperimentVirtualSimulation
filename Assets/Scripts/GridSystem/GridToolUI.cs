@@ -104,7 +104,19 @@ namespace GridSystem
         {
             _canvasGroup.blocksRaycasts = true;
 
-            // Handled by GridSlotUI or GridManager, fallback below
+            // Distance-based snapping: Find the closest valid slot within a 40 pixel radius
+            if (GridManager.Instance != null)
+            {
+                GridSlotUI closestSlot = GridManager.Instance.GetClosestValidSlot(eventData.position, 40f);
+
+                if (closestSlot != null)
+                {
+                    closestSlot.OccupySlot(this);
+                    return;
+                }
+            }
+
+            // Fallback: If no valid slot found within radius, return to original position
             if (transform.parent == _canvas.transform)
             {
                 ReturnToOriginal();

@@ -98,11 +98,13 @@ namespace GridSystem.EditorScripts
             int colCount = 24;
             for (int i = 0; i < rowCount * colCount; i++)
             {
-                // The invisible drop target
+                // The main layout cell (50x50)
                 GameObject slotGO = new GameObject($"DotSlot_{i}");
+                slotGO.AddComponent<RectTransform>();
                 slotGO.transform.SetParent(gridPanelGO.transform, false);
-                Image slotImage = slotGO.AddComponent<Image>();
-                slotImage.color = new Color(0f, 0f, 0f, 0f); // Fully transparent
+
+                // Add GridSlotUI directly to the main layout cell
+                // We no longer need an Image or Raycast target here for dropping!
                 slotGO.AddComponent<GridSlotUI>();
 
                 // The visual dot inside the slot

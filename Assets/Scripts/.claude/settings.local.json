@@ -6,7 +6,10 @@
       "Bash(powershell -Command \"Get-Content 'E:\\\\U3DProject\\\\PhysicsExperimentVirtualSimulation\\\\Assets\\\\Scripts\\\\工具接线端连接表.csv' -Encoding Default\")",
       "Bash(iconv:*)",
       "Bash(git add:*)",
-      "Bash(git commit -m \"Fix pin selection bugs by moving to Button component:*)"
+      "Bash(git commit -m \"Fix pin selection bugs by moving to Button component:*)",
+      "Bash(xargs -0 grep -Hn \"IDropHandler\")",
+      "Read(//e/U3DProject/PhysicsExperimentVirtualSimulation/Assets/Scripts/**)",
+      "Bash(\"E:\\\\U3DProject\\\\PhysicsExperimentVirtualSimulation\\\\Assets\\\\Scripts\\\\GridSystem\\\\DistanceSnappingPlan.md\")"
     ]
   },
   "enableAllProjectMcpServers": true,

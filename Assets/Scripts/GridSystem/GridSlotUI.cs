@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 namespace GridSystem
 {
-    public class GridSlotUI : MonoBehaviour, IDropHandler, IPointerClickHandler
+    public class GridSlotUI : MonoBehaviour, IPointerClickHandler
     {
         public bool IsOccupied { get; private set; }
         public GridToolUI OccupyingTool { get; private set; }
@@ -11,21 +11,6 @@ namespace GridSystem
         private void Awake()
         {
             IsOccupied = false;
-        }
-
-        public void OnDrop(PointerEventData eventData)
-        {
-            if (IsOccupied) return;
-
-            GameObject droppedObj = eventData.pointerDrag;
-            if (droppedObj != null)
-            {
-                GridToolUI toolUI = droppedObj.GetComponent<GridToolUI>();
-                if (toolUI != null)
-                {
-                    OccupySlot(toolUI);
-                }
-            }
         }
 
         public void OccupySlot(GridToolUI toolUI)

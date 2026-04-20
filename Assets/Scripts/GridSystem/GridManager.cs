@@ -18,6 +18,7 @@ namespace GridSystem
         public List<GridToolData> availableTools;
 
         public Dictionary<GridSlotUI, GridToolUI> placedTools = new Dictionary<GridSlotUI, GridToolUI>();
+        public List<GridSlotUI> AllSlots { get; private set; } = new List<GridSlotUI>();
 
         private void Awake()
         {
@@ -28,6 +29,41 @@ namespace GridSystem
         private void Start()
         {
             InitializeToolbar();
+            InitializeGridSlots();
+        }
+
+        private void InitializeGridSlots()
+        {
+            if (gridContainer != null)
+            {
+                AllSlots.Clear();
+                AllSlots.AddRange(gridContainer.GetComponentsInChildren<GridSlotUI>());
+            }
+        }
+
+        public GridSlotUI GetClosestValidSlot(Vector2 screenPosition, float snapRadius)
+        {
+            GridSlotUI closestSlot = null;
+            float closestDistance = float.MaxValue;
+
+            foreach (var slot in AllSlots)
+            {
+                if (slot.IsOccupied) continue;
+
+                // Get slot's screen position
+                RectTransform slotRect = slot.GetComponent<RectTransform>();
+                Vector2 slotScreenPos = RectTransformUtility.WorldToScreenPoint(null, slotRect.position);
+
+                float distance = Vector2.Distance(screenPosition, slotScreenPos);
+
+                if (distance < closestDistance && distance <= snapRadius)
+                {
+                    closestDistance = distance;
+                    closestSlot = slot;
+                }
+            }
+
+            return closestSlot;
         }
 
         private void InitializeToolbar()
