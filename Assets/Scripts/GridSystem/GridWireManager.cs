@@ -32,9 +32,19 @@ namespace GridSystem
             float distance = dir.magnitude;
             float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
 
+            // Convert world distance to local canvas space
+            float localDistance = distance;
+            if (GridManager.Instance != null && GridManager.Instance.mainCanvas != null)
+            {
+                localDistance = distance / GridManager.Instance.mainCanvas.scaleFactor;
+            }
+
+            // Shorten the wire so it starts and ends at the edge of the 20x20 pin (10px radius on each end = 20px total)
+            float adjustedDistance = Mathf.Max(0, localDistance - 20f);
+
             lineRT.position = startPos + (dir / 2f);
             lineRT.rotation = Quaternion.Euler(0, 0, angle);
-            lineRT.sizeDelta = new Vector2(distance, 10f); // 10 is line thickness
+            lineRT.sizeDelta = new Vector2(adjustedDistance, 4f); // 4 is the new thinner line thickness
         }
 
         public bool Contains(GridToolPinUI pin)

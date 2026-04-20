@@ -46,6 +46,13 @@ namespace GridSystem
             GridSlotUI closestSlot = null;
             float closestDistance = float.MaxValue;
 
+            // Scale the snap radius by the canvas scale factor so it remains consistent across resolutions
+            float scaledSnapRadius = snapRadius;
+            if (mainCanvas != null)
+            {
+                scaledSnapRadius = snapRadius * mainCanvas.scaleFactor;
+            }
+
             foreach (var slot in AllSlots)
             {
                 if (slot.IsOccupied) continue;
@@ -56,7 +63,7 @@ namespace GridSystem
 
                 float distance = Vector2.Distance(screenPosition, slotScreenPos);
 
-                if (distance < closestDistance && distance <= snapRadius)
+                if (distance < closestDistance && distance <= scaledSnapRadius)
                 {
                     closestDistance = distance;
                     closestSlot = slot;

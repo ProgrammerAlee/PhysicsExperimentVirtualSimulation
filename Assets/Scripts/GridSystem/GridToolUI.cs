@@ -107,7 +107,10 @@ namespace GridSystem
             // Distance-based snapping: Find the closest valid slot within a 40 pixel radius
             if (GridManager.Instance != null)
             {
-                GridSlotUI closestSlot = GridManager.Instance.GetClosestValidSlot(eventData.position, 40f);
+                // Calculate the screen position of the TOOL'S CENTER, not the mouse cursor
+                Vector2 toolScreenPosition = RectTransformUtility.WorldToScreenPoint(eventData.pressEventCamera, _rectTransform.position);
+
+                GridSlotUI closestSlot = GridManager.Instance.GetClosestValidSlot(toolScreenPosition, 40f);
 
                 if (closestSlot != null)
                 {
