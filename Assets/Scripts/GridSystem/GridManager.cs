@@ -49,9 +49,13 @@ namespace GridSystem
                 placedTools.Add(slot, tool);
 
                 // Clone the tool back into the toolbar so the user can drag another
-                var toolObj = Instantiate(toolUIPrefab, toolbarContainer);
-                var newToolUI = toolObj.GetComponent<GridToolUI>();
-                newToolUI.Setup(tool.Data, mainCanvas);
+                if (tool.isFromToolbar)
+                {
+                    tool.isFromToolbar = false;
+                    var toolObj = Instantiate(toolUIPrefab, toolbarContainer);
+                    var newToolUI = toolObj.GetComponent<GridToolUI>();
+                    newToolUI.Setup(tool.Data, mainCanvas);
+                }
             }
         }
 

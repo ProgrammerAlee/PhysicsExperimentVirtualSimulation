@@ -22,6 +22,7 @@ namespace GridSystem
 
         public void OnPinClicked()
         {
+            if (ParentTool == null || ParentTool.isFromToolbar) return;
             Debug.Log($"Pin Clicked: {PinIndex} on {ParentTool.gameObject.name}");
             GridWireManager.Instance.OnPinClicked(this);
         }

@@ -4,7 +4,9 @@
       "Bash(python3:*)",
       "Bash(powershell -Command \"Get-Content 'E:\\\\U3DProject\\\\PhysicsExperimentVirtualSimulation\\\\Assets\\\\Scripts\\\\工具接线端连接表.csv' -Encoding UTF8\")",
       "Bash(powershell -Command \"Get-Content 'E:\\\\U3DProject\\\\PhysicsExperimentVirtualSimulation\\\\Assets\\\\Scripts\\\\工具接线端连接表.csv' -Encoding Default\")",
-      "Bash(iconv:*)"
+      "Bash(iconv:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"Fix pin selection bugs by moving to Button component:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

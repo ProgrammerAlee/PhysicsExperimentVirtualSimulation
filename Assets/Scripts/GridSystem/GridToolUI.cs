@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace GridSystem
 {
-    public class GridToolUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+    public class GridToolUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
     {
         public GridToolData Data { get; private set; }
         private Image _iconImage;
@@ -119,6 +119,18 @@ namespace GridSystem
         {
             transform.SetParent(_originalParent);
             _rectTransform.anchoredPosition = _originalPosition;
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (IsPlaced && eventData.button == PointerEventData.InputButton.Right)
+            {
+                if (GridWireManager.Instance != null)
+                {
+                    GridWireManager.Instance.RemoveWiresConnectedToTool(this);
+                }
+                CurrentSlot?.ClearSlot(); // This automatically unregisters and destroys the tool
+            }
         }
 
         public void PlaceOnGrid(Transform parent)

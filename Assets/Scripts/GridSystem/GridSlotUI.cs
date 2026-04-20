@@ -21,7 +21,7 @@ namespace GridSystem
             if (droppedObj != null)
             {
                 GridToolUI toolUI = droppedObj.GetComponent<GridToolUI>();
-                if (toolUI != null && !toolUI.IsPlaced)
+                if (toolUI != null)
                 {
                     OccupySlot(toolUI);
                 }

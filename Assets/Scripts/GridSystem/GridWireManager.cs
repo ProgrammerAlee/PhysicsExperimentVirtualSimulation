@@ -34,7 +34,7 @@ namespace GridSystem
 
             lineRT.position = startPos + (dir / 2f);
             lineRT.rotation = Quaternion.Euler(0, 0, angle);
-            lineRT.sizeDelta = new Vector2(distance, 5f); // 5 is line thickness
+            lineRT.sizeDelta = new Vector2(distance, 10f); // 10 is line thickness
         }
 
         public bool Contains(GridToolPinUI pin)
@@ -120,10 +120,29 @@ namespace GridSystem
         private void CreateWire(GridToolPinUI start, GridToolPinUI end)
         {
             GameObject wireObj = Instantiate(wirePrefab, wireContainer);
+            GridWireUI wireUI = wireObj.AddComponent<GridWireUI>();
             Image lineImage = wireObj.GetComponent<Image>();
+            lineImage.raycastTarget = true; // Ensure it's clickable
 
             GridWire newWire = new GridWire(start, end, lineImage);
+            wireUI.wireReference = newWire;
             activeWires.Add(newWire);
+        }
+
+        public void RemoveWiresConnectedToTool(GridToolUI tool)
+        {
+            List<GridWire> wiresToRemove = new List<GridWire>();
+            foreach (var wire in activeWires)
+            {
+                if (tool.Pins.Contains(wire.StartPin) || tool.Pins.Contains(wire.EndPin))
+                {
+                    wiresToRemove.Add(wire);
+                }
+            }
+            foreach (var wire in wiresToRemove)
+            {
+                RemoveWire(wire);
+            }
         }
 
         public void RemoveWire(GridWire wire)
