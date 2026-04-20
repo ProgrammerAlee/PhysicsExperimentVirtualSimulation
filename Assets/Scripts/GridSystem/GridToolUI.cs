@@ -17,6 +17,7 @@ namespace GridSystem
         private Transform _originalParent;
         public bool IsPlaced { get; private set; }
         public GridSlotUI CurrentSlot { get; set; }
+        public bool isFromToolbar = true;
 
         public List<GridToolPinUI> Pins { get; private set; } = new List<GridToolPinUI>();
 
@@ -36,6 +37,7 @@ namespace GridSystem
             }
 
             IsPlaced = false;
+            isFromToolbar = true;
             CreatePins();
         }
 
@@ -49,18 +51,27 @@ namespace GridSystem
 
             for (int i = 0; i < Data.pinCount; i++)
             {
-                GameObject pinObj = new GameObject($"Pin_{i}", typeof(RectTransform), typeof(Image), typeof(GridToolPinUI));
+                GameObject pinObj = new GameObject($"Pin_{i}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(GridToolPinUI));
                 pinObj.transform.SetParent(transform, false);
 
                 RectTransform pinRT = pinObj.GetComponent<RectTransform>();
-                pinRT.sizeDelta = new Vector2(10f, 10f); // Size of the pin visual
+                pinRT.sizeDelta = new Vector2(20f, 20f); // Size of the pin visual
 
                 // Position pins along the bottom edge
                 float xPos = -width / 2f + spacing * (i + 1);
                 pinRT.anchoredPosition = new Vector2(xPos, -_rectTransform.rect.height / 2f);
 
                 Image pinImage = pinObj.GetComponent<Image>();
-                pinImage.color = Color.red; // Distinct color for pins
+                pinImage.color = Color.white; // Button handles coloring via ColorBlock
+                pinImage.raycastTarget = true;
+
+                Button pinButton = pinObj.GetComponent<Button>();
+                ColorBlock colors = pinButton.colors;
+                colors.normalColor = Color.red;
+                colors.highlightedColor = new Color(1f, 0.5f, 0.5f); // Lighter red
+                colors.pressedColor = new Color(0.5f, 0f, 0f); // Dark red
+                colors.selectedColor = Color.red;
+                pinButton.colors = colors;
 
                 GridToolPinUI pinUI = pinObj.GetComponent<GridToolPinUI>();
                 pinUI.Setup(this, i);
@@ -71,13 +82,6 @@ namespace GridSystem
 
         public void OnBeginDrag(PointerEventData eventData)
         {
-            if (IsPlaced)
-            {
-                CurrentSlot?.ClearSlot();
-                CurrentSlot = null;
-                IsPlaced = false;
-            }
-
             _originalPosition = _rectTransform.anchoredPosition;
             _originalParent = transform.parent;
 
@@ -90,6 +94,10 @@ namespace GridSystem
         public void OnDrag(PointerEventData eventData)
         {
             _rectTransform.anchoredPosition += eventData.delta / _canvas.scaleFactor;
+            if (GridWireManager.Instance != null)
+            {
+                GridWireManager.Instance.UpdateWiresForTool(this);
+            }
         }
 
         public void OnEndDrag(PointerEventData eventData)
@@ -97,9 +105,13 @@ namespace GridSystem
             _canvasGroup.blocksRaycasts = true;
 
             // Handled by GridSlotUI or GridManager, fallback below
-            if (!IsPlaced)
+            if (transform.parent == _canvas.transform)
             {
                 ReturnToOriginal();
+                if (GridWireManager.Instance != null)
+                {
+                    GridWireManager.Instance.UpdateWiresForTool(this);
+                }
             }
         }
 
@@ -111,9 +123,21 @@ namespace GridSystem
 
         public void PlaceOnGrid(Transform parent)
         {
+            if (IsPlaced && CurrentSlot != null && CurrentSlot.transform != parent)
+            {
+                CurrentSlot.ClearSlot();
+            }
             IsPlaced = true;
             transform.SetParent(parent, false);
+            _rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            _rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+            _rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
             _rectTransform.anchoredPosition = Vector2.zero;
+
+            if (GridWireManager.Instance != null)
+            {
+                GridWireManager.Instance.UpdateWiresForTool(this);
+            }
         }
     }
 }

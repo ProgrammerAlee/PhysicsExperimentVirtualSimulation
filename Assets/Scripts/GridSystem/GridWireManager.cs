@@ -69,23 +69,41 @@ namespace GridSystem
             if (_selectedPin == null)
             {
                 // First click
-                _selectedPin = clickedPin;
-                // Optional: visually highlight the selected pin here
+                SelectPin(clickedPin);
+            }
+            else if (_selectedPin == clickedPin)
+            {
+                // Second click on SAME pin: Deselect
+                DeselectPin();
+            }
+            else if (_selectedPin.ParentTool == clickedPin.ParentTool)
+            {
+                // Second click on DIFFERENT pin but SAME tool: Deselect old, Select new
+                DeselectPin();
+                SelectPin(clickedPin);
             }
             else
             {
-                // Second click
-                if (_selectedPin != clickedPin && !WireExists(_selectedPin, clickedPin))
+                // Second click on DIFFERENT tool: Connect
+                if (!WireExists(_selectedPin, clickedPin))
                 {
-                    // Prevent connecting to the same tool
-                    if (_selectedPin.ParentTool != clickedPin.ParentTool)
-                    {
-                        CreateWire(_selectedPin, clickedPin);
-                    }
+                    CreateWire(_selectedPin, clickedPin);
                 }
+                DeselectPin();
+            }
+        }
 
-                // Reset selection
-                // Optional: remove highlight from _selectedPin here
+        private void SelectPin(GridToolPinUI pin)
+        {
+            _selectedPin = pin;
+            pin.SetSelected(true);
+        }
+
+        private void DeselectPin()
+        {
+            if (_selectedPin != null)
+            {
+                _selectedPin.SetSelected(false);
                 _selectedPin = null;
             }
         }
@@ -114,6 +132,17 @@ namespace GridSystem
             activeWires.Remove(wire);
         }
 
+        public void UpdateWiresForTool(GridToolUI tool)
+        {
+            foreach (var wire in activeWires)
+            {
+                if (tool.Pins.Contains(wire.StartPin) || tool.Pins.Contains(wire.EndPin))
+                {
+                    wire.UpdateLine();
+                }
+            }
+        }
+
         public void ClearAllWires()
         {
             foreach (var wire in activeWires)
@@ -121,7 +150,7 @@ namespace GridSystem
                 if (wire.LineImage != null) Destroy(wire.LineImage.gameObject);
             }
             activeWires.Clear();
-            _selectedPin = null;
+            DeselectPin();
         }
     }
 }
