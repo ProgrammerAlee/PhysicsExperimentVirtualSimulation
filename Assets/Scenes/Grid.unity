@@ -66494,10 +66494,30 @@ MonoBehaviour:
   toolUIPrefab: {fileID: 8630196253332628530, guid: b4018e03c3cc0c344bdd73a5ca53e6eb, type: 3}
   mainCanvas: {fileID: 1768058833}
   availableTools:
-  - {fileID: 11400000, guid: d613c7e62ce31654dadafe6eb88f6038, type: 2}
-  - {fileID: 11400000, guid: e9dce602d6f9b7a4e81cc4b9ceca9ccd, type: 2}
-  - {fileID: 11400000, guid: 99565c8275aa5a54288108161d3b245e, type: 2}
-  - {fileID: 11400000, guid: 5d35dbba75c433f498a42f879c2238fd, type: 2}
+  - {fileID: 11400000, guid: 10d842c0727aed849acaeb905464311e, type: 2}
+  - {fileID: 11400000, guid: a2f4e2ef919f5924f81008c9f47fdd38, type: 2}
+  - {fileID: 11400000, guid: 2f59ea62b3a97834b8557710459de137, type: 2}
+  - {fileID: 11400000, guid: c11d68466c0abbd47a065aa7763d82bd, type: 2}
+  - {fileID: 11400000, guid: b3c308077f6590044846cc600ec007e5, type: 2}
+  - {fileID: 11400000, guid: 39fba794a5fc1a84ab0b09d710729ea3, type: 2}
+  - {fileID: 11400000, guid: 9e60944651e77944990eeccb26eea0df, type: 2}
+  - {fileID: 11400000, guid: e3852a68e3a7a63498673c0d130241ff, type: 2}
+  - {fileID: 11400000, guid: f0377d56a217c8a45b3a1a3c6db48b64, type: 2}
+  - {fileID: 11400000, guid: 8f53fd33b3988dd46a842e484e3a9576, type: 2}
+  - {fileID: 11400000, guid: 77dc862cfdc46a241a4658a752e9c777, type: 2}
+  - {fileID: 11400000, guid: 61ffc327cd80faf4a9697b9aa92fe20a, type: 2}
+  - {fileID: 11400000, guid: bc361031861fdf8478880fa9b9fc800c, type: 2}
+  - {fileID: 11400000, guid: 2531fa9e167d71645864e799c7b5f33f, type: 2}
+  - {fileID: 11400000, guid: f18eb36074ba3ad449dbfdb5789bac0e, type: 2}
+  - {fileID: 11400000, guid: 390b838e789f6ca43819081254dc4777, type: 2}
+  - {fileID: 11400000, guid: e496ed24fad2a7349989c65c4c31897a, type: 2}
+  - {fileID: 11400000, guid: b4efd5b8e94ad634aa12a8174d72dbbd, type: 2}
+  - {fileID: 11400000, guid: 0b8c87ca46d3ca24f893acc75966f361, type: 2}
+  - {fileID: 11400000, guid: 19193868e107e474cbe369008ab60d23, type: 2}
+  - {fileID: 11400000, guid: 78a160743b649d84aab396a4a0ad9590, type: 2}
+  - {fileID: 11400000, guid: 716a9241c48722043930e67ca52f283c, type: 2}
+  - {fileID: 11400000, guid: 2a8c79c035ceb2043b84699b3cd4990b, type: 2}
+  - {fileID: 11400000, guid: a33f809e6aba29a4c9e885b0550554e7, type: 2}
 --- !u!1 &1804442826
 GameObject:
   m_ObjectHideFlags: 0
