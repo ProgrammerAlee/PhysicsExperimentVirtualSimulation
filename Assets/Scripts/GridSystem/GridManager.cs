@@ -11,13 +11,14 @@ namespace GridSystem
         [Header("References")]
         public Transform toolbarContainer;
         public Transform gridContainer;
+        public Transform toolContainer;
         public GameObject toolUIPrefab;
         public Canvas mainCanvas;
 
         [Header("Data")]
         public List<GridToolData> availableTools;
 
-        public Dictionary<GridSlotUI, GridToolUI> placedTools = new Dictionary<GridSlotUI, GridToolUI>();
+        public Dictionary<GridSlotUI, GridToolUI> placedTools = new Dictionary<GridSlotUI, GridToolUI>();       
         public List<GridSlotUI> AllSlots { get; private set; } = new List<GridSlotUI>();
 
         private void Awake()
@@ -46,7 +47,6 @@ namespace GridSystem
             GridSlotUI closestSlot = null;
             float closestDistance = float.MaxValue;
 
-            // Scale the snap radius by the canvas scale factor so it remains consistent across resolutions
             float scaledSnapRadius = snapRadius;
             if (mainCanvas != null)
             {
@@ -57,9 +57,8 @@ namespace GridSystem
             {
                 if (slot.IsOccupied) continue;
 
-                // Get slot's screen position
                 RectTransform slotRect = slot.GetComponent<RectTransform>();
-                Vector2 slotScreenPos = RectTransformUtility.WorldToScreenPoint(null, slotRect.position);
+                Vector2 slotScreenPos = RectTransformUtility.WorldToScreenPoint(null, slotRect.position);       
 
                 float distance = Vector2.Distance(screenPosition, slotScreenPos);
 
@@ -80,8 +79,6 @@ namespace GridSystem
                 var toolObj = Instantiate(toolUIPrefab, toolbarContainer);
                 var toolUI = toolObj.GetComponent<GridToolUI>();
                 toolUI.Setup(toolData, mainCanvas);
-
-                // Attach drag scripts dynamically if necessary, or handled on prefab
             }
         }
 
@@ -91,7 +88,6 @@ namespace GridSystem
             {
                 placedTools.Add(slot, tool);
 
-                // Clone the tool back into the toolbar so the user can drag another
                 if (tool.isFromToolbar)
                 {
                     tool.isFromToolbar = false;
@@ -102,21 +98,25 @@ namespace GridSystem
             }
         }
 
-        public void UnregisterPlacedTool(GridSlotUI slot)
+        public void UnregisterPlacedTool(GridSlotUI slot, bool destroyTool = true)
         {
             if (placedTools.ContainsKey(slot))
             {
                 var tool = placedTools[slot];
                 placedTools.Remove(slot);
-                if (tool != null) Destroy(tool.gameObject);
+                if (destroyTool && tool != null) 
+                {
+                    Destroy(tool.gameObject);
+                }
             }
         }
 
         public void ClearGrid()
         {
-            foreach (var slot in placedTools.Keys)
+            List<GridSlotUI> slotsToClear = new List<GridSlotUI>(placedTools.Keys);
+            foreach (var slot in slotsToClear)
             {
-                slot.ClearSlot();
+                slot.ClearSlot(true);
             }
             placedTools.Clear();
             GridWireManager.Instance.ClearAllWires();

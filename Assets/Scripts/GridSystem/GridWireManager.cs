@@ -22,34 +22,24 @@ namespace GridSystem
         {
             if (StartPin == null || EndPin == null || LineImage == null) return;
 
-            RectTransform startRT = StartPin.GetComponent<RectTransform>();
-            RectTransform endRT = EndPin.GetComponent<RectTransform>();
             RectTransform lineRT = LineImage.GetComponent<RectTransform>();
-
-            Vector2 startPos = startRT.position;
-            Vector2 endPos = endRT.position;
-            Vector2 dir = endPos - startPos;
+            Vector3 startPos = StartPin.GetComponent<RectTransform>().position;
+            Vector3 endPos = EndPin.GetComponent<RectTransform>().position;
+            
+            Vector3 dir = endPos - startPos;
             float distance = dir.magnitude;
             float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
 
-            // Convert world distance to local canvas space
-            float localDistance = distance;
-            if (GridManager.Instance != null && GridManager.Instance.mainCanvas != null)
-            {
-                localDistance = distance / GridManager.Instance.mainCanvas.scaleFactor;
-            }
-
-            // Shorten the wire so it starts and ends at the edge of the 20x20 pin (10px radius on each end = 20px total)
-            float adjustedDistance = Mathf.Max(0, localDistance - 20f);
-
             lineRT.position = startPos + (dir / 2f);
             lineRT.rotation = Quaternion.Euler(0, 0, angle);
-            lineRT.sizeDelta = new Vector2(adjustedDistance, 4f); // 4 is the new thinner line thickness
-        }
 
-        public bool Contains(GridToolPinUI pin)
-        {
-            return StartPin == pin || EndPin == pin;
+            float canvasScale = 1f;
+            if (GridManager.Instance != null && GridManager.Instance.mainCanvas != null)
+                canvasScale = GridManager.Instance.mainCanvas.scaleFactor;
+            
+            float localDistance = distance / canvasScale;
+            float adjustedDistance = Mathf.Max(0, localDistance - 20f);
+            lineRT.sizeDelta = new Vector2(adjustedDistance, 8f); // Make wires slightly thicker for easier clicking
         }
 
         public bool SameAs(GridToolPinUI p1, GridToolPinUI p2)
@@ -63,7 +53,7 @@ namespace GridSystem
         public static GridWireManager Instance { get; private set; }
 
         public Transform wireContainer;
-        public GameObject wirePrefab; // Simple Image with a RectTransform centered at 0,0
+        public GameObject wirePrefab;
 
         private GridToolPinUI _selectedPin;
         public List<GridWire> activeWires = new List<GridWire>();
@@ -78,29 +68,50 @@ namespace GridSystem
         {
             if (_selectedPin == null)
             {
-                // First click
                 SelectPin(clickedPin);
             }
             else if (_selectedPin == clickedPin)
             {
-                // Second click on SAME pin: Deselect
                 DeselectPin();
             }
             else if (_selectedPin.ParentTool == clickedPin.ParentTool)
             {
-                // Second click on DIFFERENT pin but SAME tool: Deselect old, Select new
                 DeselectPin();
                 SelectPin(clickedPin);
             }
             else
             {
-                // Second click on DIFFERENT tool: Connect
                 if (!WireExists(_selectedPin, clickedPin))
                 {
                     CreateWire(_selectedPin, clickedPin);
                 }
                 DeselectPin();
             }
+        }
+
+        // NEW: Handle clicking on an existing wire
+        public void OnWireClicked(GridWire targetWire)
+        {
+            if (_selectedPin == null) return;
+
+            // If a pin is selected and we click a wire, connect the pin to one of the wire's endpoints
+            // Logically, this makes the pin part of the same electrical node.
+            // We connect to the closest endpoint of the wire for visual neatness.
+            
+            Vector3 pinPos = _selectedPin.GetComponent<RectTransform>().position;
+            Vector3 startPos = targetWire.StartPin.GetComponent<RectTransform>().position;
+            Vector3 endPos = targetWire.EndPin.GetComponent<RectTransform>().position;
+
+            GridToolPinUI targetPin = (Vector3.Distance(pinPos, startPos) < Vector3.Distance(pinPos, endPos)) 
+                                      ? targetWire.StartPin : targetWire.EndPin;
+
+            if (_selectedPin.ParentTool != targetPin.ParentTool && !WireExists(_selectedPin, targetPin))
+            {
+                CreateWire(_selectedPin, targetPin);
+                Debug.Log($"Connected Pin {_selectedPin.PinName} to wire junction via Pin {targetPin.PinName}");
+            }
+            
+            DeselectPin();
         }
 
         private void SelectPin(GridToolPinUI pin)
@@ -132,7 +143,7 @@ namespace GridSystem
             GameObject wireObj = Instantiate(wirePrefab, wireContainer);
             GridWireUI wireUI = wireObj.AddComponent<GridWireUI>();
             Image lineImage = wireObj.GetComponent<Image>();
-            lineImage.raycastTarget = true; // Ensure it's clickable
+            lineImage.raycastTarget = true; // IMPORTANT: Allow clicks
 
             GridWire newWire = new GridWire(start, end, lineImage);
             wireUI.wireReference = newWire;

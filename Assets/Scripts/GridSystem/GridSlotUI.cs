@@ -6,7 +6,7 @@ namespace GridSystem
     public class GridSlotUI : MonoBehaviour, IPointerClickHandler
     {
         public bool IsOccupied { get; private set; }
-        public GridToolUI OccupyingTool { get; private set; }
+        public GridToolUI OccupyingTool { get; private set; }    
 
         private void Awake()
         {
@@ -17,22 +17,20 @@ namespace GridSystem
         {
             IsOccupied = true;
             OccupyingTool = toolUI;
-            toolUI.CurrentSlot = this;
-            toolUI.PlaceOnGrid(transform);
+            toolUI.PlaceOnGrid(this);
             GridManager.Instance.RegisterPlacedTool(this, toolUI);
         }
 
-        public void ClearSlot()
+        public void ClearSlot(bool destroyTool = true)
         {
             IsOccupied = false;
             OccupyingTool = null;
-            GridManager.Instance.UnregisterPlacedTool(this);
+            GridManager.Instance.UnregisterPlacedTool(this, destroyTool);
         }
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            // Removed slot clicking as connections are now pin-to-pin
-            // Optional: you can handle slot selection if needed
+            // Optional click handling
         }
     }
 }

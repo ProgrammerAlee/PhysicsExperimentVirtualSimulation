@@ -11,26 +11,49 @@ namespace GridSystem.EditorScripts
         [MenuItem("Tools/Build Dot Matrix Grid UI")]
         public static void BuildUI()
         {
-            // 1. Create Main Canvas
-            GameObject canvasGO = new GameObject("GridSystemCanvas");
-            Canvas canvas = canvasGO.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            // 1. Find or Load Existing Canvas
+            GameObject canvasGO = GameObject.Find("GridSystemCanvas");
+            if (canvasGO == null)
+            {
+                // Try to load from prefabs if not in scene
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/GridSystemCanvas.prefab");
+                if (prefab != null)
+                {
+                    canvasGO = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+                }
+                else
+                {
+                    canvasGO = new GameObject("GridSystemCanvas");
+                    Canvas canvas = canvasGO.AddComponent<Canvas>();
+                    canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                    canvasGO.AddComponent<CanvasScaler>();
+                    canvasGO.AddComponent<GraphicRaycaster>();
+                }
+            }
 
-            CanvasScaler scaler = canvasGO.AddComponent<CanvasScaler>();
+            Canvas mainCanvas = canvasGO.GetComponent<Canvas>();
+            CanvasScaler scaler = canvasGO.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
 
-            canvasGO.AddComponent<GraphicRaycaster>();
+            // 2. Find or Create Managers
+            GridManager gridManager = canvasGO.GetComponentInChildren<GridManager>();
+            if (gridManager == null)
+            {
+                GameObject managersGO = new GameObject("GridSystemManagers");
+                managersGO.transform.SetParent(canvasGO.transform, false);
+                gridManager = managersGO.AddComponent<GridManager>();
+                managersGO.AddComponent<GridWireManager>();
+                managersGO.AddComponent<GridValidationSystem>();
+            }
+            
+            GridWireManager wireManager = canvasGO.GetComponentInChildren<GridWireManager>();
+            GridValidationSystem validationSystem = canvasGO.GetComponentInChildren<GridValidationSystem>();
 
-            // 2. Create Managers Container
-            GameObject managersGO = new GameObject("GridSystemManagers");
-            managersGO.transform.SetParent(canvasGO.transform, false);
+            gridManager.mainCanvas = mainCanvas;
 
-            GridManager gridManager = managersGO.AddComponent<GridManager>();
-            GridWireManager wireManager = managersGO.AddComponent<GridWireManager>();
-            GridValidationSystem validationSystem = managersGO.AddComponent<GridValidationSystem>();
-
-            gridManager.mainCanvas = canvas;
+            // 3. Find or Create Layouts
+            // ... (Subsequent code will use Find instead of new where appropriate)
 
             // 3. Create White Background
             GameObject bgGO = new GameObject("WhiteBackground");
@@ -134,6 +157,16 @@ namespace GridSystem.EditorScripts
             gridLayout.constraintCount = 24; // 24 columns
 
             gridManager.gridContainer = gridPanelGO.transform;
+
+            // 6.5 Create Placed Tools Container (Above grid, below wires or as needed)
+            GameObject toolContainerGO = new GameObject("PlacedToolsContainer");
+            toolContainerGO.transform.SetParent(canvasGO.transform, false);
+            RectTransform toolContainerRect = toolContainerGO.AddComponent<RectTransform>();
+            toolContainerRect.anchorMin = Vector2.zero;
+            toolContainerRect.anchorMax = Vector2.one;
+            toolContainerRect.offsetMin = Vector2.zero;
+            toolContainerRect.offsetMax = Vector2.zero;
+            gridManager.toolContainer = toolContainerGO.transform;
 
             // 7. Generate Invisible Grid Slots with Center Dots
             int rowCount = 16;

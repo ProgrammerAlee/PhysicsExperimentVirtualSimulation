@@ -13,7 +13,7 @@ namespace GridSystem
         private Canvas _canvas;
         private CanvasGroup _canvasGroup;
 
-        private Vector2 _originalPosition;
+        private Vector3 _originalWorldPosition;
         private Transform _originalParent;
         public bool IsPlaced { get; private set; }
         public GridSlotUI CurrentSlot { get; set; }
@@ -43,7 +43,6 @@ namespace GridSystem
 
         private void CreatePins()
         {
-            // Clear existing pins if any
             foreach (var pin in Pins)
             {
                 if (pin != null) Destroy(pin.gameObject);
@@ -65,13 +64,10 @@ namespace GridSystem
             }
             else if (Data.pinCount > 0)
             {
-                // Fallback to legacy bottom-edge positioning
                 float spacing = width / (Data.pinCount + 1);
                 for (int i = 0; i < Data.pinCount; i++)
                 {
                     float xPos = -width / 2f + spacing * (i + 1);
-                    Vector2 pos = new Vector2(xPos, -height / 2f);
-                    // Convert to normalized for internal consistency if needed, but here we just pass it
                     CreatePin(i, ((char)('A' + i)).ToString(), new Vector2(xPos / width, -0.5f), width, height);
                 }
             }
@@ -84,8 +80,6 @@ namespace GridSystem
 
             RectTransform pinRT = pinObj.GetComponent<RectTransform>();
             pinRT.sizeDelta = new Vector2(20f, 20f);
-            
-            // normalizedPos is relative to center, so (-0.5, -0.5) is bottom-left
             pinRT.anchoredPosition = new Vector2(normalizedPos.x * width, normalizedPos.y * height);
 
             Image pinImage = pinObj.GetComponent<Image>();
@@ -107,7 +101,7 @@ namespace GridSystem
 
         public void OnBeginDrag(PointerEventData eventData)
         {
-            _originalPosition = _rectTransform.anchoredPosition;
+            _originalWorldPosition = _rectTransform.position;
             _originalParent = transform.parent;
 
             transform.SetParent(_canvas.transform, true);
@@ -117,7 +111,12 @@ namespace GridSystem
 
         public void OnDrag(PointerEventData eventData)
         {
-            _rectTransform.anchoredPosition += eventData.delta / _canvas.scaleFactor;
+            Vector3 worldPoint;
+            if (RectTransformUtility.ScreenPointToWorldPointInRectangle(_canvas.GetComponent<RectTransform>(), eventData.position, eventData.pressEventCamera, out worldPoint))
+            {
+                _rectTransform.position = worldPoint;
+            }
+
             if (GridWireManager.Instance != null)
             {
                 GridWireManager.Instance.UpdateWiresForTool(this);
@@ -153,7 +152,7 @@ namespace GridSystem
         public void ReturnToOriginal()
         {
             transform.SetParent(_originalParent);
-            _rectTransform.anchoredPosition = _originalPosition;
+            _rectTransform.position = _originalWorldPosition;
         }
 
         public void OnPointerClick(PointerEventData eventData)
@@ -164,23 +163,32 @@ namespace GridSystem
                 {
                     GridWireManager.Instance.RemoveWiresConnectedToTool(this);
                 }
-                CurrentSlot?.ClearSlot();
+                CurrentSlot?.ClearSlot(true); // Right click DOES destroy the tool
             }
         }
 
-        public void PlaceOnGrid(Transform parent)
+        public void PlaceOnGrid(GridSlotUI slot)
         {
-            if (IsPlaced && CurrentSlot != null && CurrentSlot.transform != parent)
+            // If already placed somewhere else, clear that slot BUT don't destroy this object!
+            if (IsPlaced && CurrentSlot != null && CurrentSlot != slot)
             {
-                CurrentSlot.ClearSlot();
+                CurrentSlot.ClearSlot(false); 
             }
+            
             IsPlaced = true;
-            transform.SetParent(parent, false);
-            _rectTransform.pivot = new Vector2(0.5f, 0.5f);
-            _rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
-            _rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-            _rectTransform.anchoredPosition = Vector2.zero;
+            CurrentSlot = slot;
 
+            if (GridManager.Instance != null && GridManager.Instance.toolContainer != null)
+            {
+                transform.SetParent(GridManager.Instance.toolContainer, true);
+            }
+            else
+            {
+                transform.SetParent(slot.transform, false);
+            }
+
+            _rectTransform.position = slot.GetComponent<RectTransform>().position;
+            
             if (GridWireManager.Instance != null)
             {
                 GridWireManager.Instance.UpdateWiresForTool(this);
