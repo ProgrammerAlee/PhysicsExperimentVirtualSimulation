@@ -16,3 +16,10 @@ MonoBehaviour:
   toolName: RW15
   icon: {fileID: 21300000, guid: 3e2ceb70d43b7be4588e26256031b3ea, type: 3}
   pinCount: 3
+  pinDefinitions:
+  - name: A
+    normalizedPosition: {x: -0.5, y: 0}
+  - name: B
+    normalizedPosition: {x: 0, y: 0.5}
+  - name: C
+    normalizedPosition: {x: 0.5, y: 0}

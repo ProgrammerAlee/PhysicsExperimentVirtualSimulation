@@ -43,49 +43,73 @@ namespace GridSystem
 
         private void CreatePins()
         {
-            // Create small square images to represent pins, spaced along the bottom edge for now
-            if (Data == null || Data.pinCount <= 0) return;
+            // Clear existing pins if any
+            foreach (var pin in Pins)
+            {
+                if (pin != null) Destroy(pin.gameObject);
+            }
+            Pins.Clear();
+
+            if (Data == null) return;
 
             float width = _rectTransform.rect.width;
-            float spacing = width / (Data.pinCount + 1);
+            float height = _rectTransform.rect.height;
 
-            for (int i = 0; i < Data.pinCount; i++)
+            if (Data.pinDefinitions != null && Data.pinDefinitions.Count > 0)
             {
-                GameObject pinObj = new GameObject($"Pin_{i}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(GridToolPinUI));
-                pinObj.transform.SetParent(transform, false);
-
-                RectTransform pinRT = pinObj.GetComponent<RectTransform>();
-                pinRT.sizeDelta = new Vector2(20f, 20f); // Size of the pin visual
-
-                // Position pins along the bottom edge
-                float xPos = -width / 2f + spacing * (i + 1);
-                pinRT.anchoredPosition = new Vector2(xPos, -_rectTransform.rect.height / 2f);
-
-                Image pinImage = pinObj.GetComponent<Image>();
-                pinImage.color = Color.white; // Button handles coloring via ColorBlock
-                pinImage.raycastTarget = true;
-
-                Button pinButton = pinObj.GetComponent<Button>();
-                ColorBlock colors = pinButton.colors;
-                colors.normalColor = Color.red;
-                colors.highlightedColor = new Color(1f, 0.5f, 0.5f); // Lighter red
-                colors.pressedColor = new Color(0.5f, 0f, 0f); // Dark red
-                colors.selectedColor = Color.red;
-                pinButton.colors = colors;
-
-                GridToolPinUI pinUI = pinObj.GetComponent<GridToolPinUI>();
-                pinUI.Setup(this, i);
-                Pins.Add(pinUI);
+                for (int i = 0; i < Data.pinDefinitions.Count; i++)
+                {
+                    var def = Data.pinDefinitions[i];
+                    CreatePin(i, def.name, def.normalizedPosition, width, height);
+                }
+            }
+            else if (Data.pinCount > 0)
+            {
+                // Fallback to legacy bottom-edge positioning
+                float spacing = width / (Data.pinCount + 1);
+                for (int i = 0; i < Data.pinCount; i++)
+                {
+                    float xPos = -width / 2f + spacing * (i + 1);
+                    Vector2 pos = new Vector2(xPos, -height / 2f);
+                    // Convert to normalized for internal consistency if needed, but here we just pass it
+                    CreatePin(i, ((char)('A' + i)).ToString(), new Vector2(xPos / width, -0.5f), width, height);
+                }
             }
         }
 
+        private void CreatePin(int index, string pinName, Vector2 normalizedPos, float width, float height)
+        {
+            GameObject pinObj = new GameObject($"Pin_{pinName}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(GridToolPinUI));
+            pinObj.transform.SetParent(transform, false);
+
+            RectTransform pinRT = pinObj.GetComponent<RectTransform>();
+            pinRT.sizeDelta = new Vector2(20f, 20f);
+            
+            // normalizedPos is relative to center, so (-0.5, -0.5) is bottom-left
+            pinRT.anchoredPosition = new Vector2(normalizedPos.x * width, normalizedPos.y * height);
+
+            Image pinImage = pinObj.GetComponent<Image>();
+            pinImage.color = Color.white;
+            pinImage.raycastTarget = true;
+
+            Button pinButton = pinObj.GetComponent<Button>();
+            ColorBlock colors = pinButton.colors;
+            colors.normalColor = Color.red;
+            colors.highlightedColor = new Color(1f, 0.5f, 0.5f);
+            colors.pressedColor = new Color(0.5f, 0f, 0f);
+            colors.selectedColor = Color.red;
+            pinButton.colors = colors;
+
+            GridToolPinUI pinUI = pinObj.GetComponent<GridToolPinUI>();
+            pinUI.Setup(this, index, pinName);
+            Pins.Add(pinUI);
+        }
 
         public void OnBeginDrag(PointerEventData eventData)
         {
             _originalPosition = _rectTransform.anchoredPosition;
             _originalParent = transform.parent;
 
-            // Move to root to draw over everything while dragging
             transform.SetParent(_canvas.transform, true);
             transform.SetAsLastSibling();
             _canvasGroup.blocksRaycasts = false;
@@ -104,12 +128,9 @@ namespace GridSystem
         {
             _canvasGroup.blocksRaycasts = true;
 
-            // Distance-based snapping: Find the closest valid slot within a 40 pixel radius
             if (GridManager.Instance != null)
             {
-                // Calculate the screen position of the TOOL'S CENTER, not the mouse cursor
                 Vector2 toolScreenPosition = RectTransformUtility.WorldToScreenPoint(eventData.pressEventCamera, _rectTransform.position);
-
                 GridSlotUI closestSlot = GridManager.Instance.GetClosestValidSlot(toolScreenPosition, 40f);
 
                 if (closestSlot != null)
@@ -119,7 +140,6 @@ namespace GridSystem
                 }
             }
 
-            // Fallback: If no valid slot found within radius, return to original position
             if (transform.parent == _canvas.transform)
             {
                 ReturnToOriginal();
@@ -144,7 +164,7 @@ namespace GridSystem
                 {
                     GridWireManager.Instance.RemoveWiresConnectedToTool(this);
                 }
-                CurrentSlot?.ClearSlot(); // This automatically unregisters and destroys the tool
+                CurrentSlot?.ClearSlot();
             }
         }
 

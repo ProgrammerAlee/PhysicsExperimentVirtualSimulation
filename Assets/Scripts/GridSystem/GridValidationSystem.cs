@@ -1,8 +1,9 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Generic;  
 using System.IO;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace GridSystem
 {
@@ -31,7 +32,8 @@ namespace GridSystem
     {
         public static GridValidationSystem Instance { get; private set; }
 
-        public string csvFilePath = "Config/宸ュ叿鎺ョ嚎绔繛鎺ヨ〃"; // Path inside Resources
+        public string csvFilePath = "Config/CircuitValidation"; // Recommended path
+        public Text resultText;
 
         private List<RequiredConnection> _requiredConnections = new List<RequiredConnection>();
 
@@ -53,17 +55,13 @@ namespace GridSystem
 
             if (csvData == null)
             {
-                Debug.LogError($"Could not find CSV at Resources/{csvFilePath}");
+                Debug.LogWarning($"Could not find CSV at Resources/{csvFilePath}");
                 return;
             }
 
-            // Read GBK encoded CSV
-            // Note: Unity's TextAsset.text might mess up GBK. Better to read bytes.
             Encoding gbk = null;
             try
             {
-                // Try to register CodePagesEncodingProvider if available at runtime.
-                // Avoid a compile-time dependency on System.Text.Encoding.CodePages
                 var providerType = Type.GetType("System.Text.CodePagesEncodingProvider, System.Text.Encoding.CodePages")
                                    ?? Type.GetType("System.Text.CodePagesEncodingProvider");
                 if (providerType != null)
@@ -76,49 +74,35 @@ namespace GridSystem
                         registerMethod?.Invoke(null, new[] { providerInstance });
                     }
                 }
-
                 gbk = Encoding.GetEncoding("GBK");
             }
-            catch (Exception ex)
+            catch
             {
-                Debug.LogWarning($"Failed to get GBK encoding. Falling back to default/UTF8. Error: {ex.Message}");
-                gbk = Encoding.Default;
+                gbk = Encoding.UTF8;
             }
 
             string text = gbk.GetString(csvData.bytes);
-
             string[] lines = text.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             if (lines.Length <= 1) return;
 
-            // Start from 1 to skip header
             for (int i = 1; i < lines.Length; i++)
             {
                 string line = lines[i].Trim();
                 if (string.IsNullOrEmpty(line)) continue;
-
                 string[] cols = line.Split(',');
 
                 string sourceToolName = cols[0].Trim();
-
-                // Columns 1, 2, 3, 4 map to Pin 0, 1, 2, 3
                 for (int pinIndex = 0; pinIndex < 4; pinIndex++)
                 {
                     int colIndex = pinIndex + 1;
                     if (colIndex < cols.Length && !string.IsNullOrWhiteSpace(cols[colIndex]))
                     {
                         string targetToolName = cols[colIndex].Trim();
-
-                        // Check if we already have a reverse connection
                         bool foundExisting = false;
                         foreach (var existingReq in _requiredConnections)
                         {
                             if (existingReq.TargetToolName == sourceToolName && existingReq.SourceToolName == targetToolName)
                             {
-                                // We found a reverse connection. Update its TargetPin
-                                // e.g., we already had B -> A, and now we see A(pinX) -> B.
-                                // We can update B -> A to specify TargetPin = pinX
-                                // This works because B's SourcePin is already set.
-                                // It effectively becomes B(existingSourcePin) <-> A(pinX)
                                 if (!existingReq.TargetPin.HasValue)
                                 {
                                     existingReq.TargetPin = pinIndex;
@@ -130,38 +114,47 @@ namespace GridSystem
 
                         if (!foundExisting)
                         {
-                            var req = new RequiredConnection
+                            _requiredConnections.Add(new RequiredConnection
                             {
                                 SourceToolName = sourceToolName,
                                 SourcePin = pinIndex,
                                 TargetToolName = targetToolName,
                                 TargetPin = null
-                            };
-                            _requiredConnections.Add(req);
+                            });
                         }
                     }
                 }
             }
-            Debug.Log($"Loaded {_requiredConnections.Count} required connections from CSV.");
         }
 
-        public bool ValidateCircuit()
+        public void ValidateCircuit()
+        {
+            bool isValid = PerformValidation(out string message);
+            if (resultText != null)
+            {
+                resultText.text = message;
+                resultText.color = isValid ? Color.green : Color.red;
+            }
+            Debug.Log(message);
+        }
+
+        private bool PerformValidation(out string message)
         {
             List<GridWire> actualWires = GridWireManager.Instance.activeWires;
 
             if (actualWires.Count != _requiredConnections.Count)
             {
-                Debug.Log($"Validation Failed: Expected {_requiredConnections.Count} wires, but found {actualWires.Count}.");
+                message = $"验证失败: 期望 {_requiredConnections.Count} 根导线，实际发现 {actualWires.Count} 根。";
                 return false;
             }
 
-            List<RequiredConnection> unmatchedReqs = new List<RequiredConnection>(_requiredConnections);
+            List<RequiredConnection> unmatchedReqs = new List<RequiredConnection>(_requiredConnections);        
 
             foreach (var wire in actualWires)
             {
                 if (wire.StartPin == null || wire.EndPin == null)
                 {
-                    Debug.Log($"Validation Failed: Wire connected to an invalid pin.");
+                    message = "验证失败: 导线连接到了无效的针脚。";
                     return false;
                 }
 
@@ -183,19 +176,18 @@ namespace GridSystem
 
                 if (!matched)
                 {
-                    Debug.Log($"Validation Failed: Incorrect connection {t1Name}(Pin {p1}) <-> {t2Name}(Pin {p2})");
+                    message = $"验证失败: 错误的连接 {t1Name}(Pin {p1}) <-> {t2Name}(Pin {p2})";
                     return false;
                 }
             }
 
-            // Check for extra unconnected tools (tools that exist but aren't in any required connection)
             var placedTools = GridManager.Instance.placedTools.Values;
             foreach (var tool in placedTools)
             {
                 bool toolIsInConnection = false;
                 foreach (var req in _requiredConnections)
                 {
-                    if (req.SourceToolName == tool.Data.toolName || req.TargetToolName == tool.Data.toolName)
+                    if (req.SourceToolName == tool.Data.toolName || req.TargetToolName == tool.Data.toolName)   
                     {
                         toolIsInConnection = true;
                         break;
@@ -204,12 +196,12 @@ namespace GridSystem
 
                 if (!toolIsInConnection)
                 {
-                    Debug.Log($"Validation Failed: Extra tool found {tool.Data.toolName}");
+                    message = $"验证失败: 发现多余的元件 {tool.Data.toolName}";
                     return false;
                 }
             }
 
-            Debug.Log("Validation Passed! Circuit is correct.");
+            message = "验证通过! 电路连接正确。";
             return true;
         }
     }

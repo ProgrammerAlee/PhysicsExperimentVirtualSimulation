@@ -16,3 +16,10 @@ MonoBehaviour:
   toolName: IC2
   icon: {fileID: 21300000, guid: 6a93727598328ea4c895d910b503f488, type: 3}
   pinCount: 3
+  pinDefinitions:
+  - name: A
+    normalizedPosition: {x: -0.5, y: -0.2}
+  - name: B
+    normalizedPosition: {x: -0.5, y: 0.2}
+  - name: C
+    normalizedPosition: {x: 0.5, y: 0}

@@ -62,6 +62,48 @@ namespace GridSystem.EditorScripts
 
             gridManager.toolbarContainer = toolbarPanelGO.transform;
 
+            // 4.5 Create Submit Button
+            GameObject submitBtnGO = new GameObject("SubmitButton", typeof(RectTransform), typeof(Image), typeof(Button));
+            submitBtnGO.transform.SetParent(toolbarPanelGO.transform, false);
+            RectTransform submitRect = submitBtnGO.GetComponent<RectTransform>();
+            submitRect.sizeDelta = new Vector2(150, 60);
+
+            Image submitImage = submitBtnGO.GetComponent<Image>();
+            submitImage.color = new Color(0.2f, 0.6f, 0.2f); // Greenish
+
+            Button submitButton = submitBtnGO.GetComponent<Button>();
+
+            GameObject submitTextGO = new GameObject("Text", typeof(RectTransform), typeof(Text));
+            submitTextGO.transform.SetParent(submitBtnGO.transform, false);
+            Text submitText = submitTextGO.GetComponent<Text>();
+            submitText.text = "提交 / 验证";
+            submitText.alignment = TextAnchor.MiddleCenter;
+            submitText.color = Color.white;
+            submitText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            submitText.fontSize = 24;
+
+            // 4.6 Create Result Text on Canvas
+            GameObject resultTextGO = new GameObject("ResultText", typeof(RectTransform), typeof(Text));
+            resultTextGO.transform.SetParent(canvasGO.transform, false);
+            RectTransform resultRect = resultTextGO.GetComponent<RectTransform>();
+            resultRect.anchorMin = new Vector2(0.5f, 1f);
+            resultRect.anchorMax = new Vector2(0.5f, 1f);
+            resultRect.pivot = new Vector2(0.5f, 1f);
+            resultRect.anchoredPosition = new Vector2(0, -50); // Top center
+            resultRect.sizeDelta = new Vector2(800, 100);
+
+            Text resText = resultTextGO.GetComponent<Text>();
+            resText.text = "等待提交...";
+            resText.alignment = TextAnchor.MiddleCenter;
+            resText.color = Color.black;
+            resText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            resText.fontSize = 36;
+
+            validationSystem.resultText = resText;
+
+            // Link Button to Validation System using script
+            UnityEditor.Events.UnityEventTools.AddPersistentListener(submitButton.onClick, validationSystem.ValidateCircuit);
+
             // 5. Create Wire Container (behind the grid dots so dots stay visible)
             GameObject wireContainerGO = new GameObject("WireContainer");
             wireContainerGO.transform.SetParent(canvasGO.transform, false);

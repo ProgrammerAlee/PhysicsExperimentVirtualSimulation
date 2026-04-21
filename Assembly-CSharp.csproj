@@ -65,7 +65,6 @@
     <Compile Include="Assets\Scripts\GridSystem\GridSlotUI.cs" />
     <Compile Include="Assets\Mini First Person Controller\Scripts\Components\GroundCheck.cs" />
     <Compile Include="Assets\Scripts\InventoryItemUI.cs" />
-    <Compile Include="Assets\Scripts\GridSystem\CircuitData.cs" />
     <Compile Include="Assets\Scripts\GridSystem\GridToolPinUI.cs" />
     <Compile Include="Assets\Scripts\PlacedProp.cs" />
     <Compile Include="Assets\Scripts\FirstPersonController.cs" />

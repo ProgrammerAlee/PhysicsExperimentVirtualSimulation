@@ -16,3 +16,8 @@ MonoBehaviour:
   toolName: R10
   icon: {fileID: 21300000, guid: fcc1888a33da58a4dbe96e7e94eacef8, type: 3}
   pinCount: 2
+  pinDefinitions:
+  - name: A
+    normalizedPosition: {x: -0.5, y: 0}
+  - name: B
+    normalizedPosition: {x: 0.5, y: 0}
